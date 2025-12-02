@@ -3,7 +3,7 @@
 *                        The Embedded Experts                        
 **********************************************************************
 
-File    : main.c - ICA04 (A–D Combined)
+File    : main.c - ICA04 
 Author  : Jou Jon Galenzoga
 Purpose : Unified file for ICA04 using #define toggles
 *********************************************************************/
@@ -23,7 +23,7 @@ void Delay(volatile uint32_t d)
 
 
 // ===================================================================
-// PART SELECTOR — Uncomment the part you want to run
+// Uncomment the part you want to run
 // ===================================================================
 //#define RUN_PART_A
 //#define RUN_PART_B
