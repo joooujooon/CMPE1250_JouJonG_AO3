@@ -13,6 +13,9 @@
 #include "stm32g031xx.h"
 #include "usart.h"
 #include <stdio.h>   // For sprintf formatting
+#define SEGGER_RTT_DISABLE
+#define DISABLE_RTT
+
 
 // =====================================================================
 //  ICA05 BASIC INITIALIZATION + BLOCKING/NONBLOCKING BYTE IO
@@ -134,7 +137,7 @@ unsigned char _USART_RxByteB(USART_TypeDef *pUSART)
 
 
 // ---------------------------------------------------------------------
-// Receive full editable string with enforcement + backspace + enter
+// Receive full string 
 // ---------------------------------------------------------------------
 int _USART_RxString(USART_TypeDef *pUSART,
                     unsigned char *pTargetBuffer,
@@ -210,4 +213,16 @@ int _USART_RxString(USART_TypeDef *pUSART,
 
     pTargetBuffer[index] = '\0';
     return index;
+}
+int __io_putchar(int ch)
+{
+    _USART_TxByte(USART2, ch);
+    return ch;
+}
+
+int _write(int file, char *ptr, int len)
+{
+    for (int i = 0; i < len; i++)
+        _USART_TxByte(USART2, ptr[i]);
+    return len;
 }

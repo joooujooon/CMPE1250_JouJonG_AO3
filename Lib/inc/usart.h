@@ -5,8 +5,6 @@
 //  AUTHOR: Jou Jon Galenzoga
 //  FILE:   usart.h
 //  Version History
-//    ICA05 - Basic USART Library
-//    ICA06 - Advanced USART Library (strings, cursor, screen control)
 //
 /////////////////////////////////////////////////////////////////////////
 
@@ -18,7 +16,7 @@
 #include <stdio.h>      
 
 // =====================================================================
-// Terminal Geometry (fixed for PuTTY default 80×24)
+// Terminal Geometry (PuTTY default 80×24)
 // =====================================================================
 #define _USART_ROWS         24
 #define _USART_COLS         80
