@@ -1,0 +1,221 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    LAB 2 PWM GENERATOR - QUICK REFERENCE                     ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+┌─ PIN CONFIGURATION ──────────────────────────────────────────────────────────┐
+│                                                                              │
+│  PA4  → PWM Output (TIM14_CH1, AF4)  ║  Connect to oscilloscope             │
+│  PC6  → Status LED                    ║  ON when PWM active                  │
+│  PA2  → USART2 TX                     ║  Terminal output                     │
+│  PA3  → USART2 RX                     ║  Terminal input                      │
+│                                                                              │
+│  Enhancement Buttons (Active LOW, with pull-ups):                           │
+│  PA0  → S1 (Duty -1%)                                                        │
+│  PA1  → S2 (Duty +1%)                                                        │
+│  PA11 → S3 (Previous Frequency)                                              │
+│  PA12 → S4 (Next Frequency)                                                  │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌─ FREQUENCY TABLE ────────────────────────────────────────────────────────────┐
+│                                                                              │
+│  Key │ Freq    │ PSC  │ ARR  │ Calculation                                  │
+│  ────┼─────────┼──────┼──────┼───────────────────────────────────────────   │
+│   A  │  100 Hz │  320 │ 1000 │ 32MHz / (320 × 1000) = 100                   │
+│   B  │  500 Hz │   64 │ 1000 │ 32MHz / (64 × 1000) = 500                    │
+│   C  │    1kHz │   32 │ 1000 │ 32MHz / (32 × 1000) = 1000                   │
+│   D  │    5kHz │   64 │  100 │ 32MHz / (64 × 100) = 5000                    │
+│   E  │   10kHz │   32 │  100 │ 32MHz / (32 × 100) = 10000                   │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌─ ESSENTIAL FORMULAS ─────────────────────────────────────────────────────────┐
+│                                                                              │
+│  System Clock:                                                               │
+│    SYSCLK = HSI16 × N / R                                                    │
+│    32MHz = 16MHz × 8 / 4                                                     │
+│                                                                              │
+│  PWM Frequency:                                                              │
+│    f_PWM = SYSCLK / (PSC × ARR)                                              │
+│    Example: 1kHz = 32MHz / (32 × 1000)                                       │
+│                                                                              │
+│  Duty Cycle:                                                                 │
+│    Duty% = (CCR / ARR) × 100%                                                │
+│    Example: 50% = (500 / 1000) × 100%                                        │
+│                                                                              │
+│  CCR from Percentage:                                                        │
+│    CCR = (ARR × Duty%) / 100                                                 │
+│    Example: CCR = (1000 × 75) / 100 = 750                                    │
+│                                                                              │
+│  Resolution (percent per step):                                              │
+│    Resolution = 100% / ARR                                                   │
+│    Example: 100% / 1000 = 0.1% per step                                      │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌─ KEYBOARD CONTROLS ──────────────────────────────────────────────────────────┐
+│                                                                              │
+│  SPACE     Toggle PWM On/Off                                                 │
+│  +  or  =  Increase duty cycle by 5% (clamped at 100%)                      │
+│  -         Decrease duty cycle by 5% (clamped at 0%)                        │
+│  0-9       Set duty to (digit × 10)% [0=0%, 5=50%, 9=90%]                   │
+│                                                                              │
+│  A         Select 100 Hz                                                     │
+│  B         Select 500 Hz                                                     │
+│  C         Select 1 kHz                                                      │
+│  D         Select 5 kHz                                                      │
+│  E         Select 10 kHz                                                     │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌─ INITIALIZATION SEQUENCE ────────────────────────────────────────────────────┐
+│                                                                              │
+│  1. Clock_InitPll(PLL_32MHZ);                                                │
+│  2. _GPIO_ClockEnable(GPIOA); _GPIO_ClockEnable(GPIOC);                      │
+│  3. _USART_Init_USART2(32000000, 192300);                                    │
+│  4. Configure PA4 as AF4 (TIM14_CH1):                                        │
+│       _GPIO_SetPinMode(GPIOA, 4, _GPIO_PinMode_AlternateFunction);           │
+│       _GPIO_SetPinAlternateFunction(GPIOA, 4, 4);                            │
+│  5. Configure PC6 as output (LED):                                           │
+│       _GPIO_SetPinMode(GPIOC, 6, _GPIO_PinMode_Output);                      │
+│  6. Enable TIM14: RCC->APBENR2 |= RCC_APBENR2_TIM14EN;                       │
+│  7. Configure PWM:                                                           │
+│       Timer_Init(TIM14, prescaler, period);                                  │
+│       Timer_ConfigPWM(TIM14, TIMER_CHANNEL1, TIMER_PWM_MODE1);               │
+│       Timer_SetDutyPercent(TIM14, TIMER_CHANNEL1, 50);                       │
+│       Timer_EnableOutput(TIM14, TIMER_CHANNEL1);                             │
+│  8. Start timer: Timer_Start(TIM14);                                         │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌─ DEBUGGING CHECKLIST ────────────────────────────────────────────────────────┐
+│                                                                              │
+│  ☐ PA4 configured as Alternate Function (not GPIO output)                   │
+│  ☐ PA4 set to AF4 (TIM14_CH1 mapping)                                        │
+│  ☐ TIM14 clock enabled (RCC->APBENR2)                                        │
+│  ☐ Timer initialized with correct PSC and ARR                               │
+│  ☐ PWM mode configured (CCMR1 register)                                      │
+│  ☐ CCR1 set to desired duty cycle value                                     │
+│  ☐ Output enabled (CCER register, CC1E bit)                                 │
+│  ☐ Timer counter started (CR1 register, CEN bit)                            │
+│  ☐ SYSCLK actually running at 32MHz (verify with MCO output)                │
+│  ☐ Terminal baud rate = 192300                                               │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌─ OSCILLOSCOPE VERIFICATION ──────────────────────────────────────────────────┐
+│                                                                              │
+│  Test Case: 1 kHz, 50% Duty                                                 │
+│  ─────────────────────────────────────────────                              │
+│  Expected Period:    1000 μs (1 ms)                                          │
+│  Expected HIGH time:  500 μs                                                 │
+│  Expected LOW time:   500 μs                                                 │
+│  Scope Settings:     500 μs/div timebase                                     │
+│                                                                              │
+│  Waveform:                                                                   │
+│       ┌────┐    ┌────┐    ┌────┐                                            │
+│       │    │    │    │    │    │                                            │
+│  ─────┘    └────┘    └────┘    └────                                        │
+│       <──> <────────>                                                        │
+│       500μs  1000μs                                                          │
+│                                                                              │
+│  Test Case: 5 kHz, 75% Duty                                                 │
+│  ─────────────────────────────────────────                                  │
+│  Expected Period:    200 μs                                                  │
+│  Expected HIGH time:  150 μs                                                 │
+│  Expected LOW time:    50 μs                                                 │
+│  Scope Settings:     50 μs/div timebase                                      │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌─ REGISTER REFERENCE ─────────────────────────────────────────────────────────┐
+│                                                                              │
+│  TIM14 Key Registers:                                                        │
+│  ────────────────────                                                        │
+│  CR1    Control Register 1                                                   │
+│          - CEN (bit 0): Counter enable                                       │
+│                                                                              │
+│  PSC    Prescaler Register                                                   │
+│          - Value = (desired_prescaler - 1)                                   │
+│                                                                              │
+│  ARR    Auto-Reload Register                                                 │
+│          - Value = (desired_period - 1)                                      │
+│          - Defines PWM period                                                │
+│                                                                              │
+│  CCR1   Capture/Compare Register 1                                           │
+│          - Value determines duty cycle                                       │
+│          - Range: 0 to ARR                                                   │
+│                                                                              │
+│  CCMR1  Capture/Compare Mode Register 1                                      │
+│          - OC1M (bits 6:4): Output compare mode                              │
+│          - 110 = PWM Mode 1 (active when CNT < CCR)                          │
+│          - 111 = PWM Mode 2 (active when CNT > CCR)                          │
+│          - OC1PE (bit 3): Preload enable                                     │
+│                                                                              │
+│  CCER   Capture/Compare Enable Register                                      │
+│          - CC1E (bit 0): Channel 1 output enable                             │
+│                                                                              │
+│  GPIO Key Registers (PA4):                                                   │
+│  ──────────────────────────                                                  │
+│  MODER  Mode Register                                                        │
+│          - Bits 9:8 = 10 (Alternate Function)                                │
+│                                                                              │
+│  AFRL   Alternate Function Low Register                                      │
+│          - Bits 19:16 = 0100 (AF4)                                           │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌─ COMMON VALUES ──────────────────────────────────────────────────────────────┐
+│                                                                              │
+│  Duty Cycle Examples (ARR = 1000):                                           │
+│    0%   → CCR =    0                                                         │
+│   10%   → CCR =  100                                                         │
+│   25%   → CCR =  250                                                         │
+│   50%   → CCR =  500                                                         │
+│   75%   → CCR =  750                                                         │
+│   90%   → CCR =  900                                                         │
+│  100%   → CCR = 1000                                                         │
+│                                                                              │
+│  Duty Cycle Examples (ARR = 100):                                            │
+│   50%   → CCR =   50                                                         │
+│   75%   → CCR =   75                                                         │
+│  100%   → CCR =  100                                                         │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌─ TROUBLESHOOTING GUIDE ──────────────────────────────────────────────────────┐
+│                                                                              │
+│  Problem: No PWM output                                                      │
+│  ────────────────────────                                                    │
+│  ✓ Check PA4 is in AF mode, not output mode                                 │
+│  ✓ Verify AF4 is selected (not AF0, AF1, etc.)                              │
+│  ✓ Confirm TIM14 clock is enabled                                           │
+│  ✓ Check timer is started (CEN bit)                                         │
+│  ✓ Verify output is enabled (CC1E bit)                                      │
+│  ✓ Ensure CCR1 > 0 (otherwise 0% duty = always LOW)                         │
+│                                                                              │
+│  Problem: Wrong frequency                                                    │
+│  ─────────────────────────                                                   │
+│  ✓ Verify SYSCLK is 32MHz (use MCO to output clock)                         │
+│  ✓ Check PSC and ARR values match table                                     │
+│  ✓ Remember: registers are 0-indexed (PSC-1, ARR-1)                         │
+│  ✓ Measure actual frequency with oscilloscope                               │
+│                                                                              │
+│  Problem: Duty cycle not changing                                           │
+│  ───────────────────────────────────                                         │
+│  ✓ Verify CCR1 is being updated                                             │
+│  ✓ Check if preload is enabled (may need update event)                      │
+│  ✓ Ensure timer is running                                                  │
+│                                                                              │
+│  Problem: Terminal garbled/no output                                         │
+│  ─────────────────────────────────────                                       │
+│  ✓ Baud rate must be exactly 192300                                          │
+│  ✓ PA2/PA3 configured as AF1 (USART2)                                        │
+│  ✓ Check physical connections                                               │
+│  ✓ Try sending single character first                                       │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                              END OF REFERENCE                                ║
+╚══════════════════════════════════════════════════════════════════════════════╝

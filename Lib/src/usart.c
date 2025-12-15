@@ -12,7 +12,7 @@
 
 #include "stm32g031xx.h"
 #include "usart.h"
-#include <stdio.h>   // For sprintf formatting
+#include <stdio.h>  
 #define SEGGER_RTT_DISABLE
 #define DISABLE_RTT
 

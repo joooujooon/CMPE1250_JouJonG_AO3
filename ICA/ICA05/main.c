@@ -165,7 +165,7 @@ int main(void)                          // Program entry point
 // ===================================================================
 // ========================= PART E ==================================
 // UPPERCASE + OVERRUN HANDLING
-// Convert a–z to A–Z, ignore whitespace, detect and clear ORE
+// Convert a–z → A–Z, ignore whitespace, detect and clear ORE
 // ===================================================================
 #ifdef RUN_PART_E
 

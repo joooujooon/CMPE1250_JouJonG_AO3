@@ -1,0 +1,869 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                  LAB 2 PWM GENERATOR - TESTING GUIDE                         ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                          TESTING SETUP CHECKLIST                             │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+REQUIRED HARDWARE:
+─────────────────
+☐ STM32G031 Development Board
+☐ USB-to-Serial adapter (for terminal)
+☐ Oscilloscope (to verify PWM waveforms)
+☐ LED + 330Ω resistor (optional, for visual feedback)
+☐ 4 push buttons (optional, for enhancement testing)
+☐ Breadboard and jumper wires
+
+REQUIRED SOFTWARE:
+─────────────────
+☐ Terminal emulator (PuTTY, TeraTerm, or similar)
+☐ STM32 development environment (IDE)
+☐ Programmer/debugger (ST-Link)
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                         STEP 1: HARDWARE SETUP                               │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+MINIMAL SETUP (Base Requirements):
+──────────────────────────────────
+
+1. Connect USB-to-Serial Adapter:
+   ────────────────────────────────
+   STM32 PA2 (TX) ──→ USB-Serial RX
+   STM32 PA3 (RX) ──→ USB-Serial TX
+   STM32 GND      ──→ USB-Serial GND
+   
+   ⚠️ IMPORTANT: Cross TX to RX!
+
+2. Connect PWM Output to Oscilloscope:
+   ────────────────────────────────────
+   Oscilloscope Probe (+) ──→ PA4
+   Oscilloscope GND       ──→ STM32 GND
+   
+   Optional: Connect LED for visual feedback
+   PA4 ──→ LED Anode ──→ 330Ω Resistor ──→ GND
+
+3. Connect Status LED (PC6):
+   ─────────────────────────
+   PC6 ──→ LED Anode ──→ 330Ω Resistor ──→ GND
+
+ENHANCEMENT SETUP (Optional Buttons):
+─────────────────────────────────────
+
+4. Connect Buttons (Active-Low with Internal Pull-ups):
+   ────────────────────────────────────────────────────
+   
+   Button S1: PA0 ──→ [Button] ──→ GND
+   Button S2: PA1 ──→ [Button] ──→ GND
+   Button S3: PA11 ──→ [Button] ──→ GND
+   Button S4: PA12 ──→ [Button] ──→ GND
+   
+   Note: Internal pull-ups are enabled in code, no external resistors needed!
+
+WIRING DIAGRAM:
+──────────────
+
+                    STM32G031
+                ┌──────────────────┐
+                │                  │
+    USB-Serial  │  PA2 (TX) ●──────┼────→ To USB-Serial RX
+    Connection  │  PA3 (RX) ●──────┼────→ To USB-Serial TX
+                │                  │
+    Oscilloscope│  PA4 (PWM)●──────┼────→ Scope Probe / LED
+                │                  │
+    Status LED  │  PC6 (LED)●──────┼────→ LED + Resistor
+                │                  │
+    Buttons     │  PA0 (S1) ●──────┼────→ Button to GND
+    (Optional)  │  PA1 (S2) ●──────┼────→ Button to GND
+                │  PA11(S3) ●──────┼────→ Button to GND
+                │  PA12(S4) ●──────┼────→ Button to GND
+                │                  │
+                │  GND      ●──────┼────→ Common Ground
+                │                  │
+                └──────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                      STEP 2: SOFTWARE COMPILATION                            │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+1. CREATE PROJECT STRUCTURE:
+   ─────────────────────────
+   
+   Your_Project/
+   ├── src/
+   │   └── main.c           ← The file I provided
+   ├── inc/
+   │   ├── clock.h          ← Your existing library
+   │   ├── gpio.h           ← Your existing library
+   │   ├── Timer.h          ← Your existing library
+   │   └── usart.h          ← Your existing library
+   └── libs/
+       ├── clock.c          ← Your existing library
+       ├── gpio.c           ← Your existing library
+       ├── Timer.c          ← Your existing library
+       └── usart.c          ← Your existing library
+
+2. VERIFY LIBRARY COMPATIBILITY:
+   ────────────────────────────
+   
+   ✓ Check that all library functions match the code
+   ✓ Ensure stm32g031xx.h is included
+   ✓ Verify CMSIS files are present
+
+3. COMPILE THE PROJECT:
+   ────────────────────
+   
+   In your IDE:
+   • Build → Rebuild All
+   • Check for errors
+   • Fix any warnings
+
+4. FLASH THE PROGRAM:
+   ──────────────────
+   
+   • Connect ST-Link debugger
+   • Flash → Download to target
+   • Reset the board
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                    STEP 3: TERMINAL CONFIGURATION                            │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+PUTTY SETTINGS (Windows):
+────────────────────────
+
+1. Open PuTTY
+2. Connection type: Serial
+3. Serial line: COM3 (check Device Manager for correct port)
+4. Speed: 192300
+5. Click "Open"
+
+Advanced settings:
+• Configuration → Connection → Serial
+  - Baud rate: 192300
+  - Data bits: 8
+  - Stop bits: 1
+  - Parity: None
+  - Flow control: None
+
+• Configuration → Terminal
+  - Local echo: Force off
+  - Local line editing: Force off
+
+TERATERM SETTINGS (Windows):
+────────────────────────────
+
+1. Open TeraTerm
+2. File → New Connection → Serial
+3. Port: Your COM port
+4. Setup → Serial Port:
+   - Baud rate: 192300
+   - Data: 8 bit
+   - Parity: none
+   - Stop bits: 1 bit
+   - Flow control: none
+
+MINICOM/SCREEN (Linux/Mac):
+───────────────────────────
+
+screen /dev/ttyUSB0 192300
+
+or
+
+minicom -b 192300 -D /dev/ttyUSB0
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                    STEP 4: OSCILLOSCOPE CONFIGURATION                        │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+INITIAL SETUP:
+─────────────
+
+1. Connect Channel 1 probe to PA4
+2. Connect ground clip to STM32 GND
+3. Set probe attenuation: 1X (or 10X if available)
+4. Set voltage scale: 1V/div
+5. Set coupling: DC
+
+TIMEBASE SETTINGS PER FREQUENCY:
+────────────────────────────────
+
+Frequency │ Period  │ Recommended Timebase │ What You'll See
+──────────┼─────────┼──────────────────────┼─────────────────
+  100 Hz  │  10 ms  │   2 ms/div           │ 5 cycles on screen
+  500 Hz  │   2 ms  │ 500 μs/div           │ 4 cycles on screen
+    1 kHz │   1 ms  │ 200 μs/div           │ 5 cycles on screen
+    5 kHz │ 200 μs  │  50 μs/div           │ 4 cycles on screen
+   10 kHz │ 100 μs  │  20 μs/div           │ 5 cycles on screen
+
+TRIGGER SETTINGS:
+────────────────
+
+• Mode: Auto or Normal
+• Source: Channel 1
+• Edge: Rising
+• Level: ~1.5V (middle of signal)
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                       STEP 5: BASIC FUNCTIONALITY TEST                       │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+TEST 1: POWER-ON BEHAVIOR
+─────────────────────────
+
+EXPECTED RESULT:
+1. Terminal clears and shows UI header
+2. PWM state shows "IDLE (STOPPED)"
+3. Frequency shows "100 Hz (Key: A)"
+4. Duty cycle shows "50%"
+5. Duty bar shows half-filled
+6. Clock shows "Uptime: 00:00:00"
+7. PC6 LED is OFF
+8. Oscilloscope shows flat line (no PWM)
+
+✓ PASS: All above conditions met
+✗ FAIL: If terminal garbled → Check baud rate (192300)
+✗ FAIL: If no display → Check PA2/PA3 connections
+
+
+TEST 2: PWM ENABLE/DISABLE
+──────────────────────────
+
+PROCEDURE:
+1. Press SPACE key
+
+EXPECTED RESULT:
+• Terminal updates: State changes to "ACTIVE"
+• PC6 LED turns ON
+• Oscilloscope shows square wave
+  - Frequency: ~100 Hz
+  - Duty cycle: ~50%
+  - Voltage: 0V to 3.3V
+
+2. Press SPACE key again
+
+EXPECTED RESULT:
+• Terminal updates: State changes to "IDLE (STOPPED)"
+• PC6 LED turns OFF
+• Oscilloscope shows flat line
+
+✓ PASS: PWM toggles on/off correctly
+✗ FAIL: No waveform → Check PA4 AF4 configuration
+
+
+TEST 3: FREQUENCY SELECTION
+───────────────────────────
+
+PROCEDURE:
+1. Ensure PWM is ON (press SPACE if needed)
+2. Press 'A' key → Should see 100 Hz
+3. Press 'B' key → Should see 500 Hz
+4. Press 'C' key → Should see 1 kHz
+5. Press 'D' key → Should see 5 kHz
+6. Press 'E' key → Should see 10 kHz
+
+VERIFICATION TABLE:
+
+Key │ Expected Freq │ Expected Period │ Measured (fill in)
+────┼───────────────┼─────────────────┼───────────────────
+ A  │    100 Hz     │     10.00 ms    │ __________ ms
+ B  │    500 Hz     │      2.00 ms    │ __________ ms
+ C  │      1 kHz    │      1.00 ms    │ __________ ms
+ D  │      5 kHz    │    200.00 μs    │ __________ μs
+ E  │     10 kHz    │    100.00 μs    │ __________ μs
+
+MEASUREMENT TIPS:
+• Use oscilloscope's cursor or measurement function
+• Measure from rising edge to rising edge for period
+• Tolerance: ±5% is acceptable
+
+✓ PASS: All frequencies within ±5%
+✗ FAIL: Frequencies off → Check PSC/ARR calculations
+
+
+TEST 4: DUTY CYCLE ADJUSTMENT
+──────────────────────────────
+
+PROCEDURE:
+1. Set frequency to 1 kHz (press 'C')
+2. Test numeric keys:
+
+   Press '0' → Duty = 0%  (oscilloscope shows flat LOW)
+   Press '1' → Duty = 10%
+   Press '2' → Duty = 20%
+   Press '5' → Duty = 50% (equal HIGH and LOW time)
+   Press '7' → Duty = 70%
+   Press '9' → Duty = 90%
+
+VERIFICATION (at 1 kHz, 50% duty):
+
+Measurement      │ Expected │ Measured (fill in)
+─────────────────┼──────────┼───────────────────
+Period           │  1.00 ms │ __________ ms
+HIGH time        │  0.50 ms │ __________ ms
+LOW time         │  0.50 ms │ __________ ms
+Duty cycle       │    50%   │ __________ %
+
+✓ PASS: Duty cycle within ±2%
+✗ FAIL: Duty not changing → Check CCR1 updates
+
+
+TEST 5: DUTY INCREMENT/DECREMENT
+─────────────────────────────────
+
+PROCEDURE:
+1. Set duty to 50% (press '5')
+2. Press '+' key 5 times
+   
+EXPECTED:
+• Each press increases duty by 5%
+• Final duty: 75%
+• Terminal updates show: 55%, 60%, 65%, 70%, 75%
+• Duty bar extends
+
+3. Press '-' key 3 times
+
+EXPECTED:
+• Each press decreases duty by 5%
+• Final duty: 60%
+• Terminal shows: 70%, 65%, 60%
+
+4. Test clamping:
+   - Set duty to 95% (press '9', then '+')
+   - Press '+' → Should stay at 100%
+   - Press '+' → Should stay at 100% (clamped)
+   
+   - Press '-' repeatedly to 0%
+   - Press '-' → Should stay at 0% (clamped)
+
+✓ PASS: All increment/decrement behavior correct
+✗ FAIL: Not clamping → Check validation in code
+
+
+TEST 6: UPTIME CLOCK
+────────────────────
+
+PROCEDURE:
+1. Note the current time on terminal: "Uptime: 00:00:XX"
+2. Wait 10 seconds
+3. Verify time has incremented by 10 seconds
+
+EXPECTED BEHAVIOR:
+• Clock increments every second
+• Format: HH:MM:SS
+• Wraps at 24 hours (00:00:00 → 23:59:59 → 00:00:00)
+
+Test for 5 minutes:
+Time    │ Expected │ Actual (fill in)
+────────┼──────────┼──────────────────
+Start   │ 00:00:00 │ __:__:__
++1 min  │ 00:01:00 │ __:__:__
++2 min  │ 00:02:00 │ __:__:__
++5 min  │ 00:05:00 │ __:__:__
+
+✓ PASS: Clock accurate
+✗ FAIL: Clock not updating → Check TIM16 configuration
+
+
+TEST 7: USER INTERFACE UPDATES
+───────────────────────────────
+
+PROCEDURE:
+1. Change frequency (press 'C')
+2. Observe terminal
+
+EXPECTED:
+• Frequency line updates immediately
+• No flicker or corruption
+• Rest of UI remains stable
+
+3. Change duty (press '+')
+
+EXPECTED:
+• Duty cycle number updates
+• Duty bar updates (visual bar extends)
+• No screen flicker
+
+✓ PASS: UI updates smoothly
+✗ FAIL: Screen flickers → Optimize UI refresh
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                    STEP 6: ENHANCEMENT TESTING (BUTTONS)                     │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+TEST 8: BUTTON FUNCTIONALITY
+────────────────────────────
+
+PREREQUISITES:
+• Buttons connected to PA0, PA1, PA11, PA12
+• PWM is ON
+
+BUTTON S1 (PA0) - Duty -1%:
+───────────────────────────
+1. Set duty to 50% (press '5')
+2. Press S1 button once
+
+EXPECTED:
+• Duty decreases to 49%
+• Terminal updates
+• Waveform changes (very slight)
+
+3. Press S1 rapidly 10 times
+
+EXPECTED:
+• Duty decreases to 39%
+
+✓ PASS: Each press decreases by 1%
+✗ FAIL: Erratic behavior → Check debouncing
+
+
+BUTTON S2 (PA1) - Duty +1%:
+───────────────────────────
+1. Press S2 button 5 times
+
+EXPECTED:
+• Duty increases from 39% to 44%
+
+✓ PASS: Each press increases by 1%
+
+
+BUTTON S3 (PA11) - Previous Frequency:
+──────────────────────────────────────
+1. Set frequency to 1 kHz (press 'C')
+2. Press S3 button
+
+EXPECTED:
+• Frequency changes to 500 Hz
+• Terminal updates
+• Oscilloscope shows new frequency
+
+3. Press S3 again
+
+EXPECTED:
+• Frequency changes to 100 Hz
+
+4. Press S3 again
+
+EXPECTED:
+• Frequency stays at 100 Hz (doesn't wrap)
+
+✓ PASS: Cycles backwards through frequencies
+
+
+BUTTON S4 (PA12) - Next Frequency:
+──────────────────────────────────
+1. From 100 Hz, press S4
+
+EXPECTED:
+• Frequency increases to 500 Hz
+
+2. Press S4 three more times
+
+EXPECTED:
+• Frequencies: 1 kHz → 5 kHz → 10 kHz
+
+3. Press S4 again
+
+EXPECTED:
+• Frequency stays at 10 kHz (doesn't wrap)
+
+✓ PASS: Cycles forward through frequencies
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                       STEP 7: WAVEFORM VERIFICATION                          │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+DETAILED OSCILLOSCOPE MEASUREMENTS:
+───────────────────────────────────
+
+TEST CASE 1: 100 Hz, 25% Duty
+─────────────────────────────
+
+Setup:
+• Press 'A' (100 Hz)
+• Press '2', then '+' (25%)
+• Oscilloscope: 2 ms/div
+
+Measurements:                Expected │ Measured
+────────────────────────────────────┼──────────┼──────────
+Period (edge to edge)               │  10.00 ms│ _____ ms
+HIGH time                           │   2.50 ms│ _____ ms
+LOW time                            │   7.50 ms│ _____ ms
+Duty cycle (HIGH/Period × 100)      │      25% │ _____ %
+Peak voltage (HIGH level)           │    3.3 V │ _____ V
+Low voltage (LOW level)             │    0.0 V │ _____ V
+
+
+TEST CASE 2: 1 kHz, 50% Duty
+────────────────────────────
+
+Setup:
+• Press 'C' (1 kHz)
+• Press '5' (50%)
+• Oscilloscope: 200 μs/div
+
+Measurements:                Expected │ Measured
+────────────────────────────────────┼──────────┼──────────
+Period                              │   1.00 ms│ _____ ms
+HIGH time                           │ 500.00 μs│ _____ μs
+LOW time                            │ 500.00 μs│ _____ μs
+Duty cycle                          │      50% │ _____ %
+
+Expected waveform:
+      ┌────┐    ┌────┐    ┌────┐
+      │    │    │    │    │    │
+  ────┘    └────┘    └────┘    └────
+      <──>      
+      500μs     
+      <────────>
+         1 ms
+
+
+TEST CASE 3: 5 kHz, 75% Duty
+────────────────────────────
+
+Setup:
+• Press 'D' (5 kHz)
+• Press '7', then '+' (75%)
+• Oscilloscope: 50 μs/div
+
+Measurements:                Expected │ Measured
+────────────────────────────────────┼──────────┼──────────
+Period                              │ 200.00 μs│ _____ μs
+HIGH time                           │ 150.00 μs│ _____ μs
+LOW time                            │  50.00 μs│ _____ μs
+Duty cycle                          │      75% │ _____ %
+
+Expected waveform:
+      ┌───────┐  ┌───────┐  ┌───────┐
+      │       │  │       │  │       │
+  ────┘       └──┘       └──┘       └──
+      <─────>    
+      150μs      
+      <────────>
+       200μs
+
+
+TEST CASE 4: 10 kHz, 10% Duty
+─────────────────────────────
+
+Setup:
+• Press 'E' (10 kHz)
+• Press '1' (10%)
+• Oscilloscope: 20 μs/div
+
+Measurements:                Expected │ Measured
+────────────────────────────────────┼──────────┼──────────
+Period                              │ 100.00 μs│ _____ μs
+HIGH time                           │  10.00 μs│ _____ μs
+LOW time                            │  90.00 μs│ _____ μs
+Duty cycle                          │      10% │ _____ %
+
+Expected waveform:
+      ┐  ┌─┐  ┌─┐  ┌─┐  ┌─
+      │  │ │  │ │  │ │  │
+  ────┘  └─┘  └─┘  └─┘  └─
+        <>      
+       10μs     
+        <────>
+        100μs
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                        STEP 8: EDGE CASE TESTING                             │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+EDGE CASE 1: 0% Duty Cycle
+──────────────────────────
+
+Setup:
+• Press '0'
+
+EXPECTED BEHAVIOR:
+• Oscilloscope shows flat LOW (0V)
+• Terminal shows "Duty Cycle: 0%"
+• Duty bar is empty: [░░░░░░░░░░░░░░░░░]
+
+Verification:
+Oscilloscope reading: _____ V (should be ~0V constant)
+
+✓ PASS: Output is constant LOW
+✗ FAIL: If toggling → Check CCR1 = 0
+
+
+EDGE CASE 2: 100% Duty Cycle
+────────────────────────────
+
+Setup:
+• Press '9' (90%)
+• Press '+' twice (95% → 100%)
+
+EXPECTED BEHAVIOR:
+• Oscilloscope shows flat HIGH (3.3V)
+• Terminal shows "Duty Cycle: 100%"
+• Duty bar is full: [████████████████████]
+
+Verification:
+Oscilloscope reading: _____ V (should be ~3.3V constant)
+
+✓ PASS: Output is constant HIGH
+✗ FAIL: If toggling → Check CCR1 >= ARR
+
+
+EDGE CASE 3: Rapid Key Presses
+──────────────────────────────
+
+Setup:
+• Rapidly press '+' and '-' alternately (10 times each)
+
+EXPECTED BEHAVIOR:
+• No crashes or freezes
+• Terminal updates smoothly
+• Final duty cycle is predictable
+
+✓ PASS: System handles rapid input
+✗ FAIL: System freezes → Check input handling
+
+
+EDGE CASE 4: Frequency Switching During Operation
+──────────────────────────────────────────────────
+
+Setup:
+• Set 10 kHz, 75% duty
+• Rapidly switch: A → B → C → D → E → A
+
+EXPECTED BEHAVIOR:
+• PWM continues without glitches
+• Duty cycle remains at 75% across frequencies
+• Oscilloscope shows smooth transitions
+
+✓ PASS: Frequency switches smoothly
+✗ FAIL: PWM stops → Check reconfiguration logic
+
+
+EDGE CASE 5: 24-Hour Clock Rollover
+───────────────────────────────────
+
+Setup:
+• Manually set uptime to 86399 seconds (23:59:59) in code
+• Wait 2 seconds
+
+EXPECTED BEHAVIOR:
+• Clock shows 23:59:59 → 00:00:00 → 00:00:01
+
+✓ PASS: Clock rolls over correctly
+✗ FAIL: Clock goes past 23:59:59
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                      STEP 9: PERFORMANCE TESTING                             │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+TEST: PWM Stability
+───────────────────
+
+Setup:
+• Set 5 kHz, 50% duty
+• Run for 10 minutes
+
+MEASUREMENTS (every 2 minutes):
+Time   │ Frequency │ Duty Cycle │ Notes
+───────┼───────────┼────────────┼────────────────
+0 min  │ _____ Hz  │ _____ %    │
+2 min  │ _____ Hz  │ _____ %    │
+4 min  │ _____ Hz  │ _____ %    │
+6 min  │ _____ Hz  │ _____ %    │
+8 min  │ _____ Hz  │ _____ %    │
+10 min │ _____ Hz  │ _____ %    │
+
+✓ PASS: Frequency and duty remain constant
+✗ FAIL: Drift detected → Check clock stability
+
+
+TEST: Temperature Effects
+─────────────────────────
+
+Setup:
+• Set 1 kHz, 50% duty
+• Measure initial frequency
+• Let board run for 30 minutes (warm up)
+• Measure frequency again
+
+Initial frequency:  _____ Hz
+After 30 min:       _____ Hz
+Drift:              _____ Hz (should be < 50 Hz)
+
+✓ PASS: Minimal drift
+✗ FAIL: Large drift → Normal for HSI16 (no crystal)
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                      STEP 10: TROUBLESHOOTING GUIDE                          │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+PROBLEM: No Terminal Output
+───────────────────────────
+
+CHECKS:
+☐ Verify COM port is correct (Device Manager)
+☐ Check baud rate = 192300
+☐ Verify PA2/PA3 are connected correctly
+☐ Test with loopback: Connect PA2 to PA3, type should echo
+☐ Check USART2 clock is enabled
+☐ Try different terminal software
+
+FIX: Replace USB cable / Try different USB port
+
+
+PROBLEM: Terminal Shows Garbage Characters
+───────────────────────────────────────────
+
+LIKELY CAUSE: Baud rate mismatch
+
+CHECKS:
+☐ Terminal set to 192300 baud
+☐ Code uses: _USART_Init_USART2(32000000, 192300)
+☐ SYSCLK actually running at 32MHz
+
+FIX: Verify clock configuration with MCO output
+
+
+PROBLEM: No PWM Output on Oscilloscope
+───────────────────────────────────────
+
+CHECKS:
+☐ PA4 configured as AF4 (not GPIO output)
+☐ TIM14 clock enabled
+☐ Timer started (CEN bit set)
+☐ Output enabled (CC1E bit set)
+☐ CCR1 > 0 (for visible output)
+☐ Physical connections correct
+
+DEBUG STEPS:
+1. Set PA4 as GPIO output temporarily
+2. Toggle it manually: GPIO_Set(GPIOA, 4)
+3. If this works, issue is with timer config
+4. If this doesn't work, issue is with GPIO
+
+
+PROBLEM: Wrong PWM Frequency
+────────────────────────────
+
+CHECKS:
+☐ Verify SYSCLK is 32MHz (use MCO to output clock)
+☐ Check PSC and ARR values match table
+☐ Remember: PSC and ARR are 0-indexed (subtract 1)
+☐ Measure with oscilloscope cursors
+
+FORMULA VERIFICATION:
+f_pwm = SYSCLK / (PSC × ARR)
+
+For 1 kHz:
+f_pwm = 32,000,000 / (32 × 1000)
+      = 32,000,000 / 32,000
+      = 1,000 Hz ✓
+
+
+PROBLEM: Duty Cycle Not Changing
+─────────────────────────────────
+
+CHECKS:
+☐ CCR1 register being updated
+☐ Preload enabled (OC1PE bit)
+☐ Update event generated after changing CCR1
+☐ Timer is running
+
+DEBUG:
+• Add printf to show CCR1 value
+• Verify: CCR1 = (ARR × duty%) / 100
+
+
+PROBLEM: Buttons Not Working
+────────────────────────────
+
+CHECKS:
+☐ Buttons connected to correct pins
+☐ Buttons pull pins to GND when pressed
+☐ Internal pull-ups enabled
+☐ Button polling code is running
+
+DEBUG:
+• Add printf in button handler
+• Test with multimeter: Pin should read 3.3V (released) and 0V (pressed)
+
+
+PROBLEM: System Freezes
+───────────────────────
+
+LIKELY CAUSES:
+☐ Infinite loop in user code
+☐ Stack overflow
+☐ Watchdog timer (if enabled)
+
+DEBUG:
+• Use debugger to find where it stops
+• Check for while(1) loops without breaks
+• Verify stack size is sufficient
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                        ACCEPTANCE CRITERIA SUMMARY                           │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+BASE REQUIREMENTS (70%):
+───────────────────────
+
+☐ System clock configured to 32 MHz
+☐ Terminal displays correctly at 192300 baud
+☐ PWM toggles on/off with SPACE key
+☐ Status LED (PC6) indicates PWM state
+☐ 5 frequencies selectable (100Hz, 500Hz, 1kHz, 5kHz, 10kHz)
+☐ Duty cycle adjustable via +/- keys (5% steps)
+☐ Duty cycle adjustable via 0-9 keys (10% steps)
+☐ Duty bar displays visually
+☐ Uptime clock increments every second
+☐ All UI elements update correctly
+
+ENHANCEMENT (30%):
+─────────────────
+
+☐ Button S1 decreases duty by 1%
+☐ Button S2 increases duty by 1%
+☐ Button S3 cycles to previous frequency
+☐ Button S4 cycles to next frequency
+☐ Duty clamped at 0% and 100%
+☐ Frequency doesn't wrap at ends
+☐ Buttons use edge detection (not continuous hold)
+
+OSCILLOSCOPE VERIFICATION:
+─────────────────────────
+
+☐ All 5 frequencies measured within ±5%
+☐ Duty cycles accurate within ±2%
+☐ Clean square waves (no ringing)
+☐ Voltage levels: 0V to 3.3V
+☐ No glitches during frequency changes
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                           FINAL TEST REPORT                                  │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+STUDENT NAME: _______________________
+DATE: _______________________
+
+TESTS PASSED: _____ / _____
+
+GRADE CALCULATION:
+Base (70%):        _____ / 10 tests × 70% = _____ %
+Enhancement (30%): _____ /  4 tests × 30% = _____ %
+                                     TOTAL: _____ %
+
+INSTRUCTOR SIGNATURE: _______________________
+
+NOTES:
+──────────────────────────────────────────────────────────────────────────────
+
+
+
+──────────────────────────────────────────────────────────────────────────────
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                            END OF TESTING GUIDE                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝

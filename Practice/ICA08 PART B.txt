@@ -1,0 +1,42 @@
+ICA08 PART B
+```
+
+### Testing Part B
+
+#### **Test 1: Verify PWM Signal at TP1 (PA7)**
+
+**Oscilloscope Setup:**
+- Probe on PA7 (TP1)
+- Timebase: 200µs/div
+- Voltage scale: 1V/div
+
+**Expected Waveform:**
+```
+      ┌──────┐      ┌──────┐      ┌──────┐
+ 3.3V │      │      │      │      │      │
+      │      │      │      │      │      │
+   0V └──────┘      └──────┘      └──────┘
+      │←250µs→│←250µs→│
+      │←─── 500µs ───→│ (Period = 2kHz)
+```
+
+**Measurements at TP1:**
+- Period: 500µs (2 kHz)
+- High time: 250µs (for 50% duty)
+- Low time: 250µs (for 50% duty)
+- Amplitude: 0V to 3.3V
+
+---
+
+#### **Test 2: Observe Filtered Signal at TP2**
+
+**Move probe to TP2 (between R and C):**
+
+**Expected Waveform:**
+```
+       ╱‾‾‾╲     ╱‾‾‾╲     ╱‾‾‾╲
+ ~2.5V│     │   │     │   │     │
+      │     │   │     │   │     │
+ ~0.8V│     ╲___╱     ╲___╱     ╲___
+      │
+      Rounded square wave with reduced amplitude

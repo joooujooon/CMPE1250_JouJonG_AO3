@@ -13,6 +13,5 @@ Output/Debug/Obj/ICA07_PLL_Clock_MCO/main.o: \
   C:\Users\Jou\ Jon\Documents\GitHub\Embedded_CMPE1250_JouJonG\ICA\ICA07\CMSIS_5\CMSIS\Core\Include\mpu_armv7.h \
   C:\Users\Jou\ Jon\Documents\GitHub\Embedded_CMPE1250_JouJonG\ICA\ICA07\STM32G0xx\Device\Include\system_stm32g0xx.h \
   C:\Users\Jou\ Jon\Documents\GitHub\Embedded_CMPE1250_JouJonG\Lib\inc\gpio.h \
-  C:\Users\Jou\ Jon\Documents\GitHub\Embedded_CMPE1250_JouJonG\Lib\inc\clock.h \
   C:\Users\Jou\ Jon\Documents\GitHub\Embedded_CMPE1250_JouJonG\Lib\inc\usart.h \
   C:\Program\ Files\SEGGER\SEGGER\ Embedded\ Studio\ 8.24\include\stdio.h

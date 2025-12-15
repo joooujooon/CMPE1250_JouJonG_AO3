@@ -1,0 +1,80 @@
+ICA08 Part A
+```
+
+### Testing Part A
+
+#### 1. **Visual Verification**
+- Compile and flash the program
+- Observe the LED:
+  - Should gradually increase in brightness
+  - Then gradually decrease in brightness
+  - Cycle repeats approximately every 2 seconds (1s up, 1s down)
+
+#### 2. **Oscilloscope Verification**
+- **Setup:**
+  - Connect oscilloscope probe to PA4
+  - GND clip to board GND
+  - Timebase: 500µs/div
+  - Voltage: 2V/div
+
+- **Expected Waveform:**
+```
+       ___     ___     ___
+  3.3V|   |   |   |   |   |
+      |   |___|   |___|   |___
+  0V  |
+      |------ 1ms ------|
+      
+      Frequency: 1 kHz (period = 1ms)
+      Duty cycle: Changes from ~5% to ~95%
+```
+
+- **Measurements:**
+  - Period: 1.0ms ± 0.01ms
+  - Frequency: 1.0 kHz
+  - Duty cycle: Continuously varying
+  - High voltage: ~3.3V
+  - Low voltage: ~0V
+
+#### 3. **Serial Monitor Check**
+- Open PuTTY or serial terminal at 115200 baud
+- You should see:
+```
+  ========================================
+  ICA08 Part A - LED Brightness Control
+  ========================================
+  SYSCLK = 40000000 Hz
+
+  GPIO Configuration:
+    PA4 configured as TIM14_CH1 (AF4)
+
+  Timer Configuration:
+    PWM Frequency: 1 kHz
+    Prescaler: 40 (Timer clock = 1 MHz)
+    ARR: 1000
+    Initial Duty: 5% (50/1000)
+
+  Current duty: 50/1000 (5%)
+  ...
+  Peak brightness reached (95%)
+  Minimum brightness reached (5%)
+```
+
+---
+
+## Part B: Budget DAC
+
+### Hardware Setup
+
+**Build RC Low-Pass Filter Circuit:**
+```
+PA7 (TIM14_CH1) ────[10kΩ R1]────┬──── TP3 (DMM + probe)
+                                 │
+                              [100nF C1]
+                                 │
+                                GND
+
+Test Points:
+  TP1 = PA7 (before resistor) - PWM signal
+  TP2 = Junction of R1 and C1 - Filtering in progress
+  TP3 = After C1 (to GND) - Filtered DC output

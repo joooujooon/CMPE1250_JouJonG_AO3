@@ -3,14 +3,14 @@
 *                        The Embedded Experts                        
 **********************************************************************
 
-File    : main.c - ICA04 
+File    : main.c - ICA04 (A–D Combined)
 Author  : Jou Jon Galenzoga
 Purpose : Unified file for ICA04 using #define toggles
 *********************************************************************/
 
-#include <stdio.h>                 // Used by all parts
-#include "stm32g031xx.h"           // Device header
-#include "gpio.h"                  // Used in Parts B, C, D
+#include <stdio.h>               
+#include "stm32g031xx.h"         
+#include "gpio.h"                
 
 
 // ===================================================================
@@ -23,7 +23,7 @@ void Delay(volatile uint32_t d)
 
 
 // ===================================================================
-// Uncomment the part you want to run
+// PART SELECTOR — Uncomment the part you want to run
 // ===================================================================
 //#define RUN_PART_A
 //#define RUN_PART_B

@@ -27,7 +27,7 @@
 #define _USART_BUFFSIZE     64
 
 // =====================================================================
-// Enforcement options for RxString (ICA06 Part D)
+// for RxString (ICA06 Part D)
 // =====================================================================
 typedef enum
 {

@@ -76,13 +76,12 @@
   <Watches active="0" update="Never"/>
  </Watch4>
  <Files>
-  <SessionOpenFile windowGroup="DockEditLeft" x="31" y="182" useTextEdit="1" path="main.c" left="0" top="0" codecName="Default"/>
-  <SessionOpenFile windowGroup="DockEditLeft" x="4" y="14" useTextEdit="1" path="../../Lib/inc/clock.h" left="0" top="0" codecName="Default"/>
-  <SessionOpenFile windowGroup="DockEditLeft" x="1" y="30" useTextEdit="1" path="clock.c" left="0" top="0" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="26" y="298" useTextEdit="1" path="main.c" left="0" selected="1" top="273" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="53" useTextEdit="1" path="../../Lib/inc/clock.h" left="0" top="17" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="24" y="21" useTextEdit="1" path="clock.c" left="0" top="57" codecName="Default"/>
   <SessionOpenFile windowGroup="DockEditLeft" x="0" y="13" useTextEdit="1" path="../../Lib/inc/gpio.h" left="0" top="0" codecName="Default"/>
-  <SessionOpenFile windowGroup="DockEditLeft" x="17" y="11" useTextEdit="1" path="../../Lib/src/gpio.c" left="0" top="38" codecName="Default"/>
-  <SessionOpenFile windowGroup="DockEditLeft" x="22" y="18" useTextEdit="1" path="../../Lib/inc/usart.h" left="0" top="104" codecName="Default"/>
-  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="17" useTextEdit="1" path="../../Lib/src/usart.c" left="0" selected="1" top="216" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="1" y="94" useTextEdit="1" path="../../Lib/src/gpio.c" left="0" top="76" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="46" y="34" useTextEdit="1" path="../../Lib/inc/usart.h" left="0" top="1" codecName="Default"/>
  </Files>
  <EMStudioWindow activeProject="ICA07_PLL_Clock_MCO" fileDialogDefaultFilter="*.c" autoConnectTarget="J-Link" buildConfiguration="Debug" sessionSettings="" debugSearchFileMap="" fileDialogInitialDirectory="" debugSearchPath="" autoConnectCapabilities="3199"/>
 </session>
