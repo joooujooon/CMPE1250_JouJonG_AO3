@@ -1,5 +1,6 @@
 Output/Debug/Obj/Exam2\ Practice/usart.o: \
   C:\Users\Jou\ Jon\Documents\GitHub\Embedded_CMPE1250_JouJonG\Lib\src\usart.c \
+  C:\Users\Jou\ Jon\Documents\GitHub\Embedded_CMPE1250_JouJonG\Lib\inc\usart.h \
   C:\Users\Jou\ Jon\Documents\GitHub\Embedded_CMPE1250_JouJonG\Practice\STM32G0xx\Device\Include\stm32g031xx.h \
   C:\Users\Jou\ Jon\Documents\GitHub\Embedded_CMPE1250_JouJonG\Practice\CMSIS_5\CMSIS\Core\Include\core_cm0plus.h \
   C:\Program\ Files\SEGGER\SEGGER\ Embedded\ Studio\ 8.24\include\stdint.h \
@@ -12,5 +13,4 @@ Output/Debug/Obj/Exam2\ Practice/usart.o: \
   C:\Users\Jou\ Jon\Documents\GitHub\Embedded_CMPE1250_JouJonG\Practice\CMSIS_5\CMSIS\Core\Include\cmsis_gcc.h \
   C:\Users\Jou\ Jon\Documents\GitHub\Embedded_CMPE1250_JouJonG\Practice\CMSIS_5\CMSIS\Core\Include\mpu_armv7.h \
   C:\Users\Jou\ Jon\Documents\GitHub\Embedded_CMPE1250_JouJonG\Practice\STM32G0xx\Device\Include\system_stm32g0xx.h \
-  C:\Users\Jou\ Jon\Documents\GitHub\Embedded_CMPE1250_JouJonG\Lib\inc\usart.h \
   C:\Program\ Files\SEGGER\SEGGER\ Embedded\ Studio\ 8.24\include\stdio.h

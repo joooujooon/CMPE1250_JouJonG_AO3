@@ -56,8 +56,16 @@
   <Watches active="0" update="Never"/>
  </Watch4>
  <Files>
-  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="170" useTextEdit="1" path="main.c" left="0" top="97" codecName="Default"/>
-  <SessionOpenFile windowGroup="DockEditLeft" x="67" y="29" useTextEdit="1" path="main2.c" left="0" selected="1" top="32" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="18" y="47" useTextEdit="1" path="main.c" left="0" selected="1" top="48" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="98" useTextEdit="1" path="../../Lib/src/clock.c" left="0" top="83" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="53" useTextEdit="1" path="../../Lib/inc/clock.h" left="0" top="19" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="1" y="160" useTextEdit="1" path="../../Lib/src/gpio.c" left="0" top="126" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="6" y="176" useTextEdit="1" path="../../Lib/inc/gpio.h" left="0" top="141" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="1" y="110" useTextEdit="1" path="../../Lib/src/Timer.c" left="0" top="0" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="30" y="90" useTextEdit="1" path="../../Lib/inc/Timer.h" left="0" top="76" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="24" y="12" useTextEdit="1" path="../../Lib/src/usart.c" left="0" top="0" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="1" y="31" useTextEdit="1" path="../../Lib/inc/usart.h" left="0" top="0" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="0" useTextEdit="1" path="main2.c" left="0" top="57" codecName="Default"/>
  </Files>
  <EMStudioWindow activeProject="Lab02" fileDialogDefaultFilter="*.c" autoConnectTarget="J-Link" buildConfiguration="Debug" sessionSettings="" debugSearchFileMap="" fileDialogInitialDirectory="" debugSearchPath="" autoConnectCapabilities="3199"/>
 </session>

@@ -1,5 +1,5 @@
 <!DOCTYPE CrossStudio_Project_File>
-<solution Name="Practice for Exam 3" target="8" version="2">
+<solution Name="Exam 3 Practicee" target="8" version="2">
   <configuration
     Name="Debug"
     c_preprocessor_definitions="DEBUG"
@@ -12,7 +12,7 @@
     gcc_debugging_level="Level 2"
     gcc_omit_frame_pointer="Yes"
     gcc_optimization_level="Level 2 balanced" />
-  <project Name="Practice for Exam 3">
+  <project Name="Exam 3 Practicee">
     <configuration
       LIBRARY_IO_TYPE="RTT"
       Name="Common"
@@ -39,16 +39,17 @@
       gcc_entry_point="Reset_Handler"
       link_linker_script_file="$(ProjectDir)/STM32G0xx_Flash.icf"
       linker_memory_map_file="$(ProjectDir)/STM32G031K8Tx_MemoryMap.xml"
+      linker_printf_fp_enabled="Float"
       linker_printf_width_precision_supported="Yes"
       linker_scanf_character_group_matching_enabled="Yes"
+      linker_scanf_fp_enabled="Yes"
       macros="DeviceHeaderFile=$(PackagesDir)/STM32G0xx/Device/Include/stm32g0xx.h;DeviceSystemFile=$(PackagesDir)/STM32G0xx/Device/Source/system_stm32g0xx.c;DeviceVectorsFile=$(PackagesDir)/STM32G0xx/Source/stm32g031xx_Vectors.s;DeviceFamily=STM32G0xx;DeviceSubFamily=STM32G031;Target=STM32G031K8Tx"
       project_directory=""
       project_type="Executable"
       target_reset_script="Reset();" />
     <configuration
       Name="Debug"
-      c_user_include_directories="$(ProjectDir)/../Lib/inc"
-      link_linker_script_file="$(ProjectDir)/STM32G0xx_Flash.icf" />
+      c_user_include_directories="$(ProjectDir)/../Lib/inc" />
     <folder Name="CMSIS Files">
       <file file_name="STM32G0xx/Device/Include/stm32g0xx.h" />
       <file file_name="STM32G0xx/Device/Source/system_stm32g0xx.c">
@@ -70,6 +71,8 @@
       <file file_name="../Lib/src/gpio.c" />
       <file file_name="../Lib/inc/gpio.h" />
       <file file_name="main.c" />
+      <file file_name="../Lib/src/timer.c" />
+      <file file_name="../Lib/inc/timer.h" />
       <file file_name="../Lib/src/usart.c" />
       <file file_name="../Lib/inc/usart.h" />
     </folder>

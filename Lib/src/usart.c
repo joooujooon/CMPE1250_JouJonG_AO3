@@ -1,228 +1,91 @@
-///////////////////////////////////////////////////////////////////////// 
-//
-//  USART LIBRARY
-//
-//  AUTHOR: Jou Jon Galenzoga
-//  FILE:   usart.c
-//  Version History
-//    ICA05 - Basic USART Library
-//    ICA06 - Advanced USART Library (strings, cursor, screen control)
-//
-/////////////////////////////////////////////////////////////////////////
-
-#include "stm32g031xx.h"
 #include "usart.h"
-#include <stdio.h>  
-#define SEGGER_RTT_DISABLE
-#define DISABLE_RTT
+#include <stdio.h>
 
-
-// =====================================================================
-//  ICA05 BASIC INITIALIZATION + BLOCKING/NONBLOCKING BYTE IO
-// =====================================================================
-
+// ======================================================
+// INITIALIZE USART2
+// ======================================================
 void _USART_Init_USART2(uint32_t sysclk, uint32_t baud)
 {
-    // Enable GPIOA
-    RCC->IOPENR |= RCC_IOPENR_GPIOAEN;
-
-    // PA2 = TX (AF1), PA3 = RX (AF1)
-    GPIOA->MODER &= ~((3U << (2 * 2)) | (3U << (3 * 2))); // Clear mode
-    GPIOA->MODER |=  (2U << (2 * 2)) | (2U << (3 * 2));   // Alternate function
-
-    GPIOA->AFR[0] &= ~((0xF << (4 * 2)) | (0xF << (4 * 3)));
-    GPIOA->AFR[0] |=  ((1U << (4 * 2)) | (1U << (4 * 3))); // AF1 for USART2
-
-    // Enable USART2 peripheral clock
+    // Enable clocks
     RCC->APBENR1 |= RCC_APBENR1_USART2EN;
+    RCC->IOPENR  |= RCC_IOPENR_GPIOAEN;
 
-    // Disable USART before config
+    // PA2 = TX, PA3 = RX (AF1)
+    GPIOA->MODER &= ~(3U << (2 * 2));
+    GPIOA->MODER |=  (2U << (2 * 2));
+    GPIOA->MODER &= ~(3U << (3 * 2));
+    GPIOA->MODER |=  (2U << (3 * 2));
+
+    GPIOA->AFR[0] &= ~(0xF << (2 * 4));
+    GPIOA->AFR[0] |=  (1U << (2 * 4));
+    GPIOA->AFR[0] &= ~(0xF << (3 * 4));
+    GPIOA->AFR[0] |=  (1U << (3 * 4));
+
+    // Disable USART
     USART2->CR1 &= ~USART_CR1_UE;
 
-    // Compute BRR
-    USART2->BRR = (uint32_t)(sysclk / baud);
+    // Baud rate
+    USART2->BRR = sysclk / baud;
 
-    // Enable transmitter + receiver
+    // Enable TX, RX
     USART2->CR1 |= USART_CR1_TE | USART_CR1_RE;
 
-    // Enable USART2
+    // Enable USART
     USART2->CR1 |= USART_CR1_UE;
 }
 
-
-// ---------------------------------------------------------------------
-// Send a single byte (blocking)
-// ---------------------------------------------------------------------
-void _USART_TxByte(USART_TypeDef *pUSART, char data)
+// ======================================================
+// TRANSMIT FUNCTIONS
+// ======================================================
+void _USART_TxByte(USART_TypeDef *uart, char c)
 {
-    while (!(pUSART->ISR & USART_ISR_TXE_TXFNF))
-        ;
-    pUSART->TDR = data;
+    while (!(uart->ISR & USART_ISR_TXE_TXFNF));
+    uart->TDR = c;
 }
 
-
-// ---------------------------------------------------------------------
-// Non-blocking receive of a byte
-// ---------------------------------------------------------------------
-int _USART_RxByte(USART_TypeDef *pUSART, char *pData)
+void _USART_TxString(USART_TypeDef *uart, const char *str)
 {
-    if (pUSART->ISR & USART_ISR_RXNE_RXFNE)
+    while (*str)
+        _USART_TxByte(uart, *str++);
+}
+
+// ======================================================
+// RECEIVE FUNCTIONS
+// ======================================================
+char _USART_RxByteB(USART_TypeDef *uart)
+{
+    while (!(uart->ISR & USART_ISR_RXNE_RXFNE));
+    return uart->RDR;
+}
+
+uint8_t _USART_RxByte(USART_TypeDef *uart, char *c)
+{
+    if (uart->ISR & USART_ISR_RXNE_RXFNE)
     {
-        *pData = pUSART->RDR;
+        *c = uart->RDR;
         return 1;
     }
     return 0;
 }
 
-
-// =====================================================================
-//  ICA06 ADVANCED FUNCTIONS
-// =====================================================================
-
-// ---------------------------------------------------------------------
-// Send a NULL-terminated string
-// ---------------------------------------------------------------------
-void _USART_TxString(USART_TypeDef *pUSART, const char *s)
+// ======================================================
+// TERMINAL CONTROL (ANSI)
+// ======================================================
+void _USART_ClearScreen(USART_TypeDef *uart)
 {
-    if (!s) return;
-
-    while (*s != '\0')
-    {
-        _USART_TxByte(pUSART, *s);
-        s++;
-    }
+    _USART_TxString(uart, "\033[2J");
+    _USART_TxString(uart, "\033[H");
 }
 
-
-// ---------------------------------------------------------------------
-// Move cursor to (col,row) using ESC[row;colH
-// ---------------------------------------------------------------------
-void _USART_GotoXY(USART_TypeDef *pUSART, int col, int row)
+void _USART_SetCursor(USART_TypeDef *uart, uint8_t row, uint8_t col)
 {
-    char escSeq[20];
-    sprintf(escSeq, "\x1b[%d;%dH", row, col);
-    _USART_TxString(pUSART, escSeq);
+    char buf[16];
+    sprintf(buf, "\033[%d;%dH", row, col);
+    _USART_TxString(uart, buf);
 }
 
-
-// ---------------------------------------------------------------------
-// Move cursor then print string
-// ---------------------------------------------------------------------
-void _USART_TxStringXY(USART_TypeDef *pUSART, int col, int row, const char *s)
+void _USART_TxStringXY(USART_TypeDef *uart, uint8_t col, uint8_t row, const char *str)
 {
-    _USART_GotoXY(pUSART, col, row);
-    _USART_TxString(pUSART, s);
-}
-
-
-// ---------------------------------------------------------------------
-// Clear terminal screen + home cursor
-// ---------------------------------------------------------------------
-void _USART_ClearScreen(USART_TypeDef *pUSART)
-{
-    _USART_TxString(pUSART, "\x1b[2J"); // Clear screen
-    _USART_TxString(pUSART, "\x1b[H");  // Cursor home
-}
-
-
-// ---------------------------------------------------------------------
-// BLOCKING receive of one byte
-// ---------------------------------------------------------------------
-unsigned char _USART_RxByteB(USART_TypeDef *pUSART)
-{
-    while (!(pUSART->ISR & USART_ISR_RXNE_RXFNE))
-        ;
-    return pUSART->RDR;
-}
-
-
-// ---------------------------------------------------------------------
-// Receive full string 
-// ---------------------------------------------------------------------
-int _USART_RxString(USART_TypeDef *pUSART,
-                    unsigned char *pTargetBuffer,
-                    unsigned short iBufferLength,
-                    _USART_RX_ENFORCE EnforceType)
-{
-    if (!pTargetBuffer || iBufferLength < 1)
-        return 0;
-
-    int index = 0;
-
-    while (index < iBufferLength - 1)
-    {
-        unsigned char c = _USART_RxByteB(pUSART);
-
-        // ---------------------------------------------------------
-        // BACKSPACE
-        // ---------------------------------------------------------
-        if (c == '\b' || c == 127)
-        {
-            if (index > 0)
-            {
-                index--;
-                pTargetBuffer[index] = '\0';
-                _USART_TxString(pUSART, "\b \b"); // erase visual char
-            }
-            continue;
-        }
-
-        // ---------------------------------------------------------
-        // ENTER KEY
-        // ---------------------------------------------------------
-        if (c == '\r' || c == '\n')
-        {
-            pTargetBuffer[index] = '\0';
-            return index;
-        }
-
-        // ---------------------------------------------------------
-        // ENFORCEMENT RULES
-        // ---------------------------------------------------------
-        int valid = 0;
-
-        switch (EnforceType)
-        {
-            case _USART_RX_ENFORCE_ANY:
-                if (c >= ' ' && c <= '~')
-                    valid = 1;
-                break;
-
-            case _USART_RX_ENFORCE_DIGIT:
-                if (c >= '0' && c <= '9')
-                    valid = 1;
-                break;
-
-            case _USART_RX_ENFORCE_HEX:
-                if ((c >= '0' && c <= '9') ||
-                    (c >= 'a' && c <= 'f') ||
-                    (c >= 'A' && c <= 'F'))
-                    valid = 1;
-                break;
-        }
-
-        // If valid, echo and store
-        if (valid)
-        {
-            pTargetBuffer[index] = c;
-            index++;
-            _USART_TxByte(pUSART, c); // Echo it
-        }
-        // Otherwise ignore the character
-    }
-
-    pTargetBuffer[index] = '\0';
-    return index;
-}
-int __io_putchar(int ch)
-{
-    _USART_TxByte(USART2, ch);
-    return ch;
-}
-
-int _write(int file, char *ptr, int len)
-{
-    for (int i = 0; i < len; i++)
-        _USART_TxByte(USART2, ptr[i]);
-    return len;
+    _USART_SetCursor(uart, row, col);
+    _USART_TxString(uart, str);
 }

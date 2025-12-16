@@ -1,111 +1,37 @@
-/////////////////////////////////////////////////////////////////////////
-//
-//  TIMER LIBRARY (ICA08)
-//
-//  AUTHOR: Jou Jon Galenzoga
-//  FILE:   timer.c
-//  Version History
-//    ICA08 - Basic Timer and PWM functions
-//
-/////////////////////////////////////////////////////////////////////////
+#include "timer.h"                                                                // include own header
 
-#include <Timer.h>
+//==================================================================================================
+// TIM14: INIT 1MHz TICK (1us per count) like your demo: PSC = (SYSCLK/1MHz)-1
+//==================================================================================================
+void Timer14_Init_1MHzTick(uint32_t sysclkHz)                                     // init TIM14 for 1us ticks
+{                                                                                 // start function
+    RCC->APBENR2 |= RCC_APBENR2_TIM14EN;                                          // enable TIM14 clock on APB2
 
-// =====================================================================
-// Basic Timer Functions
-// =====================================================================
+    TIM14->CR1 &= ~TIM_CR1_CEN;                                                   // disable timer during config
+    TIM14->PSC = (uint16_t)((sysclkHz / 1000000u) - 1u);                          // prescaler to make 1MHz timer clock
+    TIM14->ARR = 0xFFFFu;                                                        // max auto-reload (free-running)
+    TIM14->CNT = 0u;                                                             // reset counter
+    TIM14->EGR = TIM_EGR_UG;                                                      // force update (load PSC/ARR)
+    TIM14->SR  = 0u;                                                              // clear all flags
+    TIM14->CR1 |= TIM_CR1_CEN;                                                    // enable timer
+}                                                                                 // end function
 
-void Timer_Init(TIM_TypeDef *pTimer, uint16_t prescaler, uint16_t period)
-{
-    // Disable timer during configuration
-    pTimer->CR1 &= ~TIM_CR1_CEN;
-    
-    // Set prescaler and period (subtract 1 as they are 0-indexed)
-    pTimer->PSC = prescaler - 1;
-    pTimer->ARR = period - 1;
-    
-    // Generate update event to load prescaler
-    pTimer->EGR |= TIM_EGR_UG;
-    
-    // Clear update flag
-    pTimer->SR &= ~TIM_SR_UIF;
-}
+//==================================================================================================
+// TIM14: BLOCKING DELAY IN MICROSECONDS (polling, demo-style)
+//==================================================================================================
+void Timer14_Delay_us(uint16_t us)                                                // delay N microseconds
+{                                                                                 // start function
+    uint16_t start = (uint16_t)TIM14->CNT;                                        // capture start count
+    while ((uint16_t)(TIM14->CNT - start) < us) { }                               // wait until elapsed >= us
+}                                                                                 // end function
 
-void Timer_Start(TIM_TypeDef *pTimer)
-{
-    pTimer->CR1 |= TIM_CR1_CEN;
-}
-
-void Timer_Stop(TIM_TypeDef *pTimer)
-{
-    pTimer->CR1 &= ~TIM_CR1_CEN;
-}
-
-int Timer_CheckUpdateFlag(TIM_TypeDef *pTimer)
-{
-    return (pTimer->SR & TIM_SR_UIF) ? 1 : 0;
-}
-
-void Timer_ClearUpdateFlag(TIM_TypeDef *pTimer)
-{
-    pTimer->SR &= ~TIM_SR_UIF;
-}
-
-uint16_t Timer_GetARR(TIM_TypeDef *pTimer)
-{
-    return pTimer->ARR;
-}
-
-// =====================================================================
-// PWM Functions
-// =====================================================================
-
-void Timer_ConfigPWM(TIM_TypeDef *pTimer, Timer_Channel channel, Timer_PWMMode mode)
-{
-    // For TIM14, only channel 1 exists
-    // Clear output compare mode bits (OC1M in CCMR1)
-    pTimer->CCMR1 &= ~TIM_CCMR1_OC1M;
-    
-    // Set PWM mode
-    // PWM Mode 1: 110 binary (active when CNT < CCR)
-    // PWM Mode 2: 111 binary (active when CNT > CCR)
-    if (mode == TIMER_PWM_MODE1)
-    {
-        pTimer->CCMR1 |= TIM_CCMR1_OC1M_2 | TIM_CCMR1_OC1M_1;  // 0b110
-    }
-    else // TIMER_PWM_MODE2
-    {
-        pTimer->CCMR1 |= TIM_CCMR1_OC1M_2 | TIM_CCMR1_OC1M_1 | TIM_CCMR1_OC1M_0;  // 0b111
-    }
-    
-    // Enable preload for smooth transitions
-    pTimer->CCMR1 |= TIM_CCMR1_OC1PE;
-}
-
-void Timer_SetDuty(TIM_TypeDef *pTimer, Timer_Channel channel, uint16_t duty)
-{
-    // For TIM14 CH1
-    pTimer->CCR1 = duty;
-}
-
-void Timer_SetDutyPercent(TIM_TypeDef *pTimer, Timer_Channel channel, uint8_t percent)
-{
-    if (percent > 100)
-        percent = 100;
-    
-    uint32_t arr = pTimer->ARR + 1;  // ARR is 0-indexed
-    uint16_t duty = (arr * percent) / 100;
-    
-    Timer_SetDuty(pTimer, channel, duty);
-}
-
-void Timer_EnableOutput(TIM_TypeDef *pTimer, Timer_Channel channel)
-{
-    // Enable capture/compare output for channel 1
-    pTimer->CCER |= TIM_CCER_CC1E;
-}
-
-void Timer_DisableOutput(TIM_TypeDef *pTimer, Timer_Channel channel)
-{
-    pTimer->CCER &= ~TIM_CCER_CC1E;
-}
+//==================================================================================================
+// TIM14: BLOCKING DELAY IN MILLISECONDS (built on microseconds)
+//==================================================================================================
+void Timer14_Delay_ms(uint16_t ms)                                                // delay N milliseconds
+{                                                                                 // start function
+    while (ms--)                                                                  // loop ms times
+    {                                                                             // start loop
+        Timer14_Delay_us(1000u);                                                  // 1000us = 1ms
+    }                                                                             // end loop
+}                                                                                 // end function
